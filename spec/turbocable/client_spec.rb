@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "msgpack"
+
 RSpec.describe Turbocable::Client do
   let(:config) { Turbocable::Configuration.new }
 
@@ -75,6 +77,15 @@ RSpec.describe Turbocable::Client do
       client.broadcast("stream", {x: 1}, codec: :json)
     end
 
+    it "accepts :msgpack codec and encodes the payload" do
+      expect(stub_connection).to receive(:publish) do |_subject, bytes, **|
+        unpacked = ::MessagePack.unpack(bytes)
+        expect(unpacked["msg"]).to eq("hello")
+        fake_ack
+      end
+      client.broadcast("stream", {"msg" => "hello"}, codec: :msgpack)
+    end
+
     it "raises ConfigurationError for unknown codec name" do
       expect { client.broadcast("stream", {}, codec: :nonexistent) }
         .to raise_error(Turbocable::ConfigurationError, /nonexistent/)
@@ -140,10 +151,12 @@ RSpec.describe Turbocable::Client do
   # Retry behavior
   # -------------------------------------------------------------------------
   describe "retry on transient NATS errors" do
-    before do
-      # Silence warn logging during retry specs
-      config.logger = Logger.new(File::NULL)
+    # Use a no-op clock so retry specs never actually sleep
+    subject(:client) do
+      described_class.new(config, connection: stub_connection, clock: ->(_) {})
     end
+
+    before { config.logger = Logger.new(File::NULL) }
 
     it "retries up to max_retries times on NATS::IO::Timeout" do
       config.max_retries = 2
@@ -156,9 +169,6 @@ RSpec.describe Turbocable::Client do
         fake_ack
       end
 
-      # Sleep is mocked to keep tests fast
-      allow(client).to receive(:sleep)
-
       result = client.broadcast("stream", {})
       expect(result).to be(fake_ack)
       expect(call_count).to eq(3)
@@ -167,7 +177,6 @@ RSpec.describe Turbocable::Client do
     it "raises PublishError after exhausting retries" do
       config.max_retries = 1
       allow(stub_connection).to receive(:publish).and_raise(NATS::IO::Timeout)
-      allow(client).to receive(:sleep)
 
       expect { client.broadcast("stream", {}) }
         .to raise_error(Turbocable::PublishError) do |e|
@@ -185,6 +194,112 @@ RSpec.describe Turbocable::Client do
 
       expect { client.broadcast("s", {}) }.to raise_error(Turbocable::PublishError)
       expect(call_count).to eq(1)
+    end
+
+    it "retries on NATS::JetStream::Error" do
+      config.max_retries = 1
+      call_count = 0
+      allow(stub_connection).to receive(:publish) do
+        call_count += 1
+        raise NATS::JetStream::Error if call_count == 1
+
+        fake_ack
+      end
+
+      result = client.broadcast("stream", {})
+      expect(result).to be(fake_ack)
+      expect(call_count).to eq(2)
+    end
+
+    it "PublishError carries #cause from the final attempt" do
+      config.max_retries = 0
+      allow(stub_connection).to receive(:publish).and_raise(NATS::IO::Timeout)
+
+      expect { client.broadcast("stream", {}) }
+        .to raise_error(Turbocable::PublishError) do |e|
+          expect(e.cause).to be_a(NATS::IO::Timeout)
+        end
+    end
+  end
+
+  # -------------------------------------------------------------------------
+  # Backoff timing (with fake clock)
+  # -------------------------------------------------------------------------
+  describe "exponential backoff delays" do
+    it "produces delays of ~50ms, ~100ms, ~200ms for max_retries: 3" do
+      config.max_retries = 3
+      config.publish_timeout = 10.0  # high cap so delays aren't truncated
+
+      recorded_sleeps = []
+      client_with_clock = described_class.new(
+        config,
+        connection: stub_connection,
+        clock: ->(d) { recorded_sleeps << d }
+      )
+      allow(stub_connection).to receive(:publish).and_raise(NATS::IO::Timeout)
+
+      expect { client_with_clock.broadcast("stream", {}) }
+        .to raise_error(Turbocable::PublishError)
+
+      # 3 retries = 3 sleep calls (before attempts 2, 3, 4)
+      expect(recorded_sleeps.length).to eq(3)
+
+      # Verify each delay is within the ±20% jitter band around the base
+      base_delays = [0.05, 0.10, 0.20]
+      base_delays.each_with_index do |base, i|
+        expect(recorded_sleeps[i]).to be_within(base * 0.20).of(base)
+      end
+    end
+
+    it "does not sleep when max_retries is 0" do
+      config.max_retries = 0
+
+      recorded_sleeps = []
+      client_no_retry = described_class.new(
+        config,
+        connection: stub_connection,
+        clock: ->(d) { recorded_sleeps << d }
+      )
+      allow(stub_connection).to receive(:publish).and_raise(NATS::IO::Timeout)
+
+      expect { client_no_retry.broadcast("stream", {}) }
+        .to raise_error(Turbocable::PublishError)
+
+      expect(recorded_sleeps).to be_empty
+    end
+  end
+
+  # -------------------------------------------------------------------------
+  # No-payload logging
+  # The log output must never contain payload content — only metadata.
+  # -------------------------------------------------------------------------
+  describe "no-payload logging" do
+    it "does not log payload body content during retries or final failure" do
+      config.max_retries = 1
+      config.publish_timeout = 10.0
+
+      log_io = StringIO.new
+      config.logger = Logger.new(log_io, level: Logger::DEBUG)
+
+      client_under_test = described_class.new(
+        config,
+        connection: stub_connection,
+        clock: ->(_) {}
+      )
+
+      sensitive_payload = {
+        password: "s3cr3t-t0p-s3cr3t",
+        credit_card: "4111111111111111"
+      }
+
+      allow(stub_connection).to receive(:publish).and_raise(NATS::IO::Timeout)
+
+      expect { client_under_test.broadcast("stream", sensitive_payload) }
+        .to raise_error(Turbocable::PublishError)
+
+      output = log_io.string
+      expect(output).not_to include("s3cr3t-t0p-s3cr3t")
+      expect(output).not_to include("4111111111111111")
     end
   end
 

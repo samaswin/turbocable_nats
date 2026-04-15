@@ -25,6 +25,10 @@ RSpec.describe Turbocable::Codecs do
     it "includes :json" do
       expect(described_class.registered).to include(:json)
     end
+
+    it "includes :msgpack" do
+      expect(described_class.registered).to include(:msgpack)
+    end
   end
 end
 

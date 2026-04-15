@@ -39,17 +39,19 @@ module Turbocable
     # (+.+, +*+, +>+, whitespace) are excluded.
     STREAM_NAME_PATTERN = /\A[A-Za-z0-9_:\-]+\z/
 
-    # Exponential backoff parameters (Phase 2 adds the injectable clock; here
-    # they are kept simple and self-contained).
+    # Exponential backoff parameters.
     BASE_DELAY     = 0.05  # 50 ms
     BACKOFF_FACTOR = 2
     JITTER_FACTOR  = 0.20  # ±20%
 
     # @param config [Turbocable::Configuration]
     # @param connection [Turbocable::NatsConnection, nil] injectable for tests
-    def initialize(config, connection: nil)
+    # @param clock [#call, nil] callable invoked with a duration in seconds
+    #   instead of +Kernel.sleep+; injectable for deterministic backoff specs
+    def initialize(config, connection: nil, clock: nil)
       @config     = config
       @connection = connection
+      @clock      = clock
     end
 
     # Publishes +payload+ to the +stream_name+ subject.
@@ -111,6 +113,10 @@ module Turbocable
 
       loop do
         attempts += 1
+        @config.logger.debug do
+          "[Turbocable] Publishing to '#{subject}' " \
+          "(attempt #{attempts}/#{max_retries + 1})"
+        end
 
         begin
           return connection.publish(subject, bytes, timeout: timeout)
@@ -123,7 +129,7 @@ module Turbocable
 
           break if attempts > max_retries
 
-          sleep(backoff_delay(attempts))
+          do_sleep(backoff_delay(attempts))
         rescue PublishError
           # Already wrapped by NatsConnection — re-raise without additional wrapping
           raise
@@ -138,6 +144,10 @@ module Turbocable
         end
       end
 
+      @config.logger.error do
+        "[Turbocable] Publish failed permanently after #{attempts} attempt(s) " \
+        "for '#{subject}': #{last_error&.class} — #{last_error&.message}"
+      end
       raise PublishError.new(
         "Failed to publish to '#{subject}' after #{attempts} attempt(s): #{last_error&.message}",
         subject: subject,
@@ -150,10 +160,17 @@ module Turbocable
     # jitter. Capped at +config.publish_timeout+ so we never delay longer than
     # the ack window.
     def backoff_delay(attempt)
-      base    = BASE_DELAY * (BACKOFF_FACTOR**(attempt - 1))
-      jitter  = base * JITTER_FACTOR * ((rand * 2) - 1)
-      delay   = base + jitter
+      base   = BASE_DELAY * (BACKOFF_FACTOR**(attempt - 1))
+      jitter = base * JITTER_FACTOR * ((rand * 2) - 1)
+      delay  = base + jitter
       [delay, @config.publish_timeout].min
+    end
+
+    # Suspends execution for +duration+ seconds. Delegates to the injected
+    # +clock+ callable when present, otherwise falls back to +Kernel.sleep+.
+    # Injectable for deterministic backoff tests.
+    def do_sleep(duration)
+      @clock ? @clock.call(duration) : Kernel.sleep(duration)
     end
 
     # -------------------------------------------------------------------------
