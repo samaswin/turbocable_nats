@@ -38,4 +38,7 @@ Gem::Specification.new do |spec|
 
   # Phase 1: core publish path
   spec.add_dependency "nats-pure", "~> 2.4"
+
+  # Phase 3: JWT minting & public key publishing
+  spec.add_dependency "jwt", "~> 2.8"
 end

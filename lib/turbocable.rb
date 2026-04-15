@@ -6,6 +6,7 @@ require_relative "turbocable/configuration"
 require_relative "turbocable/codecs"
 require_relative "turbocable/nats_connection"
 require_relative "turbocable/client"
+require_relative "turbocable/auth"
 
 # Turbocable is a pure-Ruby publisher for the TurboCable fan-out pipeline.
 #

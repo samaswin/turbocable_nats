@@ -64,6 +64,26 @@ module Turbocable
       false
     end
 
+    # Returns a NATS KV store handle for +bucket+, creating the bucket with
+    # sensible defaults if it does not yet exist.
+    #
+    # Used by +Turbocable::Auth.publish_public_key!+. The server watches the
+    # bucket but does not create it; the gem is the source of truth for the
+    # bucket's lifecycle.
+    #
+    # @param bucket [String] KV bucket name (e.g. +"TC_PUBKEYS"+)
+    # @param history [Integer] revision history depth (default: +1+)
+    # @return [NATS::JetStream::KeyValue]
+    # @raise [Turbocable::PublishError] if NATS is unreachable
+    def key_value(bucket, history: 1)
+      ensure_connected!
+      begin
+        @js.key_value(bucket)
+      rescue NATS::JetStream::Error::NotFound, NATS::JetStream::Error::StreamNotFound
+        @js.create_key_value(bucket: bucket, history: history)
+      end
+    end
+
     # Closes the connection if open. Safe to call multiple times.
     # @return [void]
     def close

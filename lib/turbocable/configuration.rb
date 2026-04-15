@@ -197,6 +197,69 @@ module Turbocable
     end
 
     # -------------------------------------------------------------------------
+    # JWT auth
+    # -------------------------------------------------------------------------
+
+    # @!attribute [rw] jwt_private_key
+    #   PEM-encoded RSA private key used to sign JWTs. Read from env
+    #   +TURBOCABLE_JWT_PRIVATE_KEY+ (newlines encoded as +\n+).
+    #   Required by +Turbocable::Auth.issue_token+.
+    # @return [String, nil]
+    attr_writer :jwt_private_key
+
+    def jwt_private_key
+      @jwt_private_key ||= ENV["TURBOCABLE_JWT_PRIVATE_KEY"]&.gsub('\n', "\n")
+    end
+
+    # @!attribute [rw] jwt_public_key
+    #   PEM-encoded RSA public key corresponding to +jwt_private_key+.
+    #   Read from env +TURBOCABLE_JWT_PUBLIC_KEY+ (newlines as +\n+).
+    #   Required by +Turbocable::Auth.publish_public_key!+ and
+    #   +Turbocable::Auth.verify_token+.
+    #
+    #   *Never* assign the private key here — +publish_public_key!+ will
+    #   detect private-key PEM markers and raise +AuthError+.
+    # @return [String, nil]
+    attr_writer :jwt_public_key
+
+    def jwt_public_key
+      @jwt_public_key ||= ENV["TURBOCABLE_JWT_PUBLIC_KEY"]&.gsub('\n', "\n")
+    end
+
+    # @!attribute [rw] jwt_issuer
+    #   Optional +iss+ claim added to every minted token. The server does not
+    #   currently verify +iss+, but setting it is cheap future-proofing and
+    #   helps off-platform token debuggers identify the issuer.
+    #   Read from env +TURBOCABLE_JWT_ISSUER+.
+    # @return [String, nil]
+    attr_writer :jwt_issuer
+
+    def jwt_issuer
+      @jwt_issuer ||= ENV["TURBOCABLE_JWT_ISSUER"]
+    end
+
+    # @!attribute [rw] jwt_kv_bucket
+    #   NATS KV bucket name where the public key is published.
+    #   Must match the bucket name the server is watching (default:
+    #   +"TC_PUBKEYS"+).
+    # @return [String]
+    attr_writer :jwt_kv_bucket
+
+    def jwt_kv_bucket
+      @jwt_kv_bucket ||= ENV.fetch("TURBOCABLE_JWT_KV_BUCKET", "TC_PUBKEYS")
+    end
+
+    # @!attribute [rw] jwt_kv_key
+    #   Key within +jwt_kv_bucket+ under which the public key PEM is stored.
+    #   Default: +"rails_public_key"+ (confirmed in turbocable-server docs).
+    # @return [String]
+    attr_writer :jwt_kv_key
+
+    def jwt_kv_key
+      @jwt_kv_key ||= ENV.fetch("TURBOCABLE_JWT_KV_KEY", "rails_public_key")
+    end
+
+    # -------------------------------------------------------------------------
     # Validation
     # -------------------------------------------------------------------------
 

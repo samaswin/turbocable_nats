@@ -62,6 +62,10 @@ module Turbocable
     end
   end
 
+  # Raised for authentication or JWT-related failures: invalid key material,
+  # illegal +allowed_streams+ patterns, or accidental private-key exposure.
+  class AuthError < Error; end
+
   # Raised when the encoded payload exceeds +config.max_payload_bytes+. The
   # limit is checked client-side before touching NATS so callers get a useful
   # error rather than a cryptic NATS-level rejection.
