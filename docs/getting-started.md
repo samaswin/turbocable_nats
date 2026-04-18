@@ -27,7 +27,7 @@ The fastest way to get both is with Docker Compose (included in this repo):
 ```sh
 git clone https://github.com/samaswin/turbocable
 cd turbocable
-./bin/dev   # boots nats:2.10 + ghcr.io/turbocable/server:latest
+./bin/dev   # boots nats:2.10 + ghcr.io/samaswin/turbocable-server:latest
 ```
 
 `bin/dev` blocks until `GET http://127.0.0.1:9292/health` returns `200`, then keeps the stack running in the foreground. Press `Ctrl-C` to stop.
@@ -66,7 +66,7 @@ docker run -d --name nats -p 4222:4222 nats:2.10 --jetstream
 docker run -d --name tc-server \
   -e TURBOCABLE_NATS_URL=nats://host.docker.internal:4222 \
   -p 9292:9292 \
-  ghcr.io/turbocable/server:latest
+  ghcr.io/samaswin/turbocable-server:latest
 ```
 
 Confirm the server is healthy before broadcasting:

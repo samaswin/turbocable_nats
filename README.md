@@ -68,7 +68,7 @@ Boot the server stack locally with `bin/dev` before running your application:
 
 ```sh
 ./bin/dev
-# → Starts nats:2.10 + ghcr.io/turbocable/server:latest via Docker Compose
+# → Starts nats:2.10 + ghcr.io/samaswin/turbocable-server:latest via Docker Compose
 # → Blocks until GET http://127.0.0.1:9292/health returns 200
 ```
 
@@ -217,7 +217,7 @@ The table below lists the `turbocable-server` versions this gem has been tested 
 
 **Minimum supported server version: `0.5.0`.**
 
-If you are running an older server build, use `cargo build` from the `samaswin/turbocable-server` `main` branch or pull `ghcr.io/turbocable/server:latest`.
+If you are running an older server build, use `cargo build` from the `samaswin/turbocable-server` `main` branch or pull `ghcr.io/samaswin/turbocable-server:latest`.
 
 ## Development
 

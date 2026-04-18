@@ -152,7 +152,7 @@ _No unreleased changes._
     `bundle exec rspec`, `bundle exec standardrb`, and `gem build`.
   - Dependabot for `bundler` and `github-actions` ecosystems.
   - `docker-compose.yml` scaffold pinning `nats:2.10` and
-    `ghcr.io/turbocable/server:latest`.
+    `ghcr.io/samaswin/turbocable-server:latest`.
   - `bin/dev` stub that boots the compose stack and blocks on `GET :9292/health`.
   - `CHANGELOG.md`, `README.md` (one-paragraph pitch + status), `LICENSE` (MIT).
 

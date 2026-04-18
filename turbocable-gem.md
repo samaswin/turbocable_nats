@@ -280,7 +280,7 @@ the contract that matters to end users.
    dependent gems (including `turbocable-rails`) can assert on broadcasts
    without a live NATS or server.
 3. **Integration tests (CI)** — spin up the full stack as Docker Compose
-   services: `nats:2.10 --jetstream`, `ghcr.io/turbocable/server:latest`, and
+   services: `nats:2.10 --jetstream`, `ghcr.io/samaswin/turbocable-server:latest`, and
    the Ruby test runner. Each spec:
    - Mints a JWT via `Turbocable::Auth.issue_token`.
    - Publishes the public key via `Turbocable::Auth.publish_public_key!`.
@@ -346,7 +346,7 @@ The repo ships a `bin/dev` script that:
 
 1. Verifies `nats-server --jetstream` is reachable on `nats://127.0.0.1:4222`,
    starting it in the background if not.
-2. Pulls and runs `ghcr.io/turbocable/server:latest` with
+2. Pulls and runs `ghcr.io/samaswin/turbocable-server:latest` with
    `TURBOCABLE_NATS_URL=nats://host.docker.internal:4222` exposed on `:9292`.
 3. Blocks until `GET http://127.0.0.1:9292/health` returns `200`.
 4. Drops the author into an `irb` session with `turbocable` loaded and
@@ -359,7 +359,7 @@ A `docker-compose.yml` at the repo root starts:
 | Service | Image | Notes |
 |---------|-------|-------|
 | `nats` | `nats:2.10` | Started with `-js` |
-| `turbocable-server` | `ghcr.io/turbocable/server:latest` | Depends on `nats`, exposes `9292` |
+| `turbocable-server` | `ghcr.io/samaswin/turbocable-server:latest` | Depends on `nats`, exposes `9292` |
 | `rspec` | Locally built Ruby image | Mounts the gem source, runs `bundle exec rspec` |
 
 CI invokes this compose file; local authors can run `docker compose up` to
@@ -369,7 +369,7 @@ against the server?".
 ### Running against a source build of the server
 
 When working on cross-cutting changes (e.g., a new JWT claim or codec quirk),
-authors can replace the `ghcr.io/turbocable/server:latest` service with a
+authors can replace the `ghcr.io/samaswin/turbocable-server:latest` service with a
 sibling checkout of `samaswin/turbocable-server` and `cargo run`. The
 [server README](https://github.com/samaswin/turbocable-server) documents the
 exact steps (`asdf install`, `nats-server --jetstream &`, `cargo build`,

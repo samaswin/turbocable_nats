@@ -50,7 +50,7 @@ services:
   # TurboCable server (Rust gateway)
   # ---------------------------------------------------------------------------
   turbocable-server:
-    image: ghcr.io/turbocable/server:latest
+    image: ghcr.io/samaswin/turbocable-server:latest
     depends_on:
       nats:
         condition: service_healthy
@@ -109,7 +109,7 @@ services:
   # TurboCable server — token-auth variant
   # ---------------------------------------------------------------------------
   turbocable-server-token-auth:
-    image: ghcr.io/turbocable/server:latest
+    image: ghcr.io/samaswin/turbocable-server:latest
     depends_on:
       nats-token-auth:
         condition: service_healthy
@@ -145,7 +145,7 @@ services:
   # TurboCable server — user+password variant
   # ---------------------------------------------------------------------------
   turbocable-server-user-pass:
-    image: ghcr.io/turbocable/server:latest
+    image: ghcr.io/samaswin/turbocable-server:latest
     depends_on:
       nats-user-pass:
         condition: service_healthy
