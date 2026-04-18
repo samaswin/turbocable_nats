@@ -1,0 +1,2 @@
+# Match Linux CI and StandardRB: no CRLF in tracked text files.
+* text=auto eol=lf
