@@ -1,6 +1,6 @@
 # API Stability
 
-This document defines the public API surface of `turbocable` and the compatibility promises made for the **1.0.x** line (from **1.0.0** onward).
+This document defines the public API surface of the **`turbocable_nats`** gem (the `Turbocable` module) and the compatibility promises made for the **1.0.x** line (from **1.0.0** onward).
 
 The gem follows [Semantic Versioning](https://semver.org/). Since 1.0.0:
 

@@ -1,6 +1,6 @@
 # Authentication — JWT Minting & Key Rotation
 
-The TurboCable gateway validates every WebSocket connection with an **RS256 JWT**. The `turbocable` gem handles both sides of that contract: minting short-lived tokens for subscribers and publishing the corresponding public key to the NATS KV store that the gateway watches.
+The TurboCable gateway validates every WebSocket connection with an **RS256 JWT**. The **`turbocable_nats`** gem handles both sides of that contract: minting short-lived tokens for subscribers and publishing the corresponding public key to the NATS KV store that the gateway watches.
 
 ---
 
@@ -21,7 +21,7 @@ The TurboCable gateway validates every WebSocket connection with an **RS256 JWT*
 ## Quick start
 
 ```ruby
-# config/initializers/turbocable.rb
+# config/initializers/turbocable_nats.rb
 Turbocable.configure do |c|
   c.nats_url        = ENV.fetch("TURBOCABLE_NATS_URL")
   c.jwt_private_key = ENV.fetch("TURBOCABLE_JWT_PRIVATE_KEY").gsub('\n', "\n")

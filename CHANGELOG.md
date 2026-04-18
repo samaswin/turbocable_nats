@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **RubyGems name:** the installable gem is now **`turbocable_nats`** (RubyGems
+  rejects **`turbocable`** as too similar to the existing **`turbo_cable`** gem).
+  The Ruby API remains the **`Turbocable`** module. Prefer `gem "turbocable_nats"`
+  and `require "turbocable_nats"`; `lib/turbocable.rb` is still shipped for
+  compatibility with `require "turbocable"` when both files are on the load path.
+
 ---
 
 ## [1.0.0] - 2026-04-18

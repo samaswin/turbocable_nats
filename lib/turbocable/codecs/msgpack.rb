@@ -18,7 +18,7 @@ module Turbocable
     # == Optional dependency
     #
     # This codec requires the +msgpack+ gem (~> 1.7), which is *not* a hard
-    # dependency of +turbocable+. Add it to your Gemfile:
+    # dependency of +turbocable_nats+. Add it to your Gemfile:
     #
     #   gem "msgpack", "~> 1.7"
     #

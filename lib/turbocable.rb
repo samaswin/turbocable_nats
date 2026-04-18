@@ -13,7 +13,7 @@ require_relative "turbocable/auth"
 #
 # == Quick start
 #
-#   require "turbocable"
+#   require "turbocable_nats"   # RubyGems name; loads the +Turbocable+ module
 #
 #   Turbocable.configure do |c|
 #     c.nats_url        = ENV.fetch("TURBOCABLE_NATS_URL", "nats://localhost:4222")

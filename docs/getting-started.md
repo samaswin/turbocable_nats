@@ -36,10 +36,10 @@ cd turbocable
 
 ## Installation
 
-Add `turbocable` to your app's `Gemfile`:
+Add `turbocable_nats` to your app's `Gemfile`:
 
 ```ruby
-gem "turbocable", "~> 1.0"
+gem "turbocable_nats", "~> 1.0"
 ```
 
 Then:
@@ -83,7 +83,7 @@ curl http://localhost:9292/health
 The minimal configuration for a no-auth local setup:
 
 ```ruby
-require "turbocable"
+require "turbocable_nats"
 
 Turbocable.configure do |c|
   c.nats_url = "nats://localhost:4222"
@@ -134,7 +134,7 @@ Stream names must match `/\A[A-Za-z0-9_:\-]+\z/`. Characters that break NATS sub
 
 ### Initializer
 
-Create `config/initializers/turbocable.rb`:
+Create `config/initializers/turbocable_nats.rb` (or any filename you prefer):
 
 ```ruby
 Turbocable.configure do |c|

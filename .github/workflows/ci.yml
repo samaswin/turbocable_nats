@@ -30,4 +30,4 @@ jobs:
         run: bundle exec standardrb
 
       - name: Build gem
-        run: gem build turbocable.gemspec
+        run: gem build turbocable_nats.gemspec

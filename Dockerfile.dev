@@ -1,4 +1,4 @@
-# Development / CI image for running the turbocable gem test suite inside the
+# Development / CI image for running the turbocable_nats gem test suite inside the
 # docker compose stack. Not published to any registry.
 FROM ruby:3.3-slim
 
@@ -11,7 +11,7 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Pre-install gems from Gemfile (leverages layer caching)
-COPY Gemfile Gemfile.lock* turbocable.gemspec ./
+COPY Gemfile Gemfile.lock* turbocable_nats.gemspec ./
 COPY lib/turbocable/version.rb lib/turbocable/version.rb
 
 RUN bundle install --jobs 4 --retry 3

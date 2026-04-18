@@ -1,8 +1,8 @@
-# turbocable (Ruby gem) — Scope & Architecture
+# turbocable_nats (Ruby gem) — Scope & Architecture
 
 > **Status:** Phase 1 complete. This document is the authoritative scope and
 > architectural plan for the upstream [`turbocable`](https://github.com/samaswin/turbocable)
-> Ruby gem. It targets interop with `turbocable-server` as documented in
+> repository (RubyGems package **`turbocable_nats`**). It targets interop with `turbocable-server` as documented in
 > [`docs/nats-jetstream.md`](../nats-jetstream.md),
 > [`docs/websocket-protocol.md`](../websocket-protocol.md), and
 > [`docs/jwt-authentication.md`](../jwt-authentication.md).
@@ -11,7 +11,7 @@
 
 ## 1. Purpose
 
-`turbocable` is a pure-Ruby gem that lets any Ruby application publish messages
+`turbocable_nats` is a pure-Ruby gem that lets any Ruby application publish messages
 to the TurboCable fan-out pipeline by speaking directly to NATS JetStream. It
 provides the primitives that `turbocable-rails` is built on, and can be used
 standalone by Sinatra apps, Sidekiq workers, Rake tasks, CLI scripts, or any
@@ -46,7 +46,7 @@ Network topology summary:
 
 ```
 Your Ruby app
-(turbocable gem)
+(turbocable_nats gem)
       │ TCP :4222  — gem connects HERE
       ▼
  nats-server
@@ -109,7 +109,7 @@ Your Ruby app
 ## 4. Public API (target shape)
 
 ```ruby
-require "turbocable"
+require "turbocable_nats"
 
 Turbocable.configure do |config|
   config.nats_url          = ENV.fetch("TURBOCABLE_NATS_URL", "nats://localhost:4222")
@@ -188,6 +188,7 @@ Turbocable::Auth.publish_public_key!
 ### Module layout
 
 ```
+lib/turbocable_nats.rb          # RubyGems entry; requires turbocable.rb
 lib/turbocable.rb               # top-level constants, autoload
 lib/turbocable/version.rb
 lib/turbocable/configuration.rb # Configuration struct + validate!
@@ -298,7 +299,7 @@ the contract that matters to end users.
 
 ## 9. Distribution
 
-- Released to RubyGems.org as `turbocable`.
+- Released to RubyGems.org as `turbocable_nats`.
 - Semver. Gem versions stay decoupled from server versions but the README
   documents the minimum compatible server version.
 - Source of truth: GitHub repo `samaswin/turbocable`, CI via GitHub Actions
@@ -329,7 +330,7 @@ integration surface users care about is the WebSocket fan-out.
   +------------------+        +---------------------+        +---------------+
   |  Ruby test /     |        |  turbocable-server  |        |  WS client    |
   |  dev process     |        |  (Rust, port 9292)  |        |  in specs     |
-  |  (turbocable)    |        |                     |        |               |
+  |  turbocable_nats |      |                     |        |               |
   +--------+---------+        +----------+----------+        +-------+-------+
            |                             |                           ^
            | JetStream publish           | JetStream consume         | WS frames
@@ -349,7 +350,7 @@ The repo ships a `bin/dev` script that:
 2. Pulls and runs `ghcr.io/samaswin/turbocable-server:latest` with
    `TURBOCABLE_NATS_URL=nats://host.docker.internal:4222` exposed on `:9292`.
 3. Blocks until `GET http://127.0.0.1:9292/health` returns `200`.
-4. Drops the author into an `irb` session with `turbocable` loaded and
+4. Drops the author into an `irb` session with `turbocable_nats` loaded and
    configured, ready for interactive `Turbocable.broadcast` calls.
 
 ### Docker Compose for CI and local parity

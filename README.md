@@ -1,6 +1,6 @@
-# turbocable
+# turbocable_nats
 
-Pure-Ruby publisher for the [TurboCable](https://github.com/samaswin/turbocable-server) fan-out pipeline. `turbocable` publishes messages to NATS JetStream on the `TURBOCABLE.*` subject tree, where `turbocable-server` picks them up and fans them out to WebSocket subscribers.
+Pure-Ruby publisher for the [TurboCable](https://github.com/samaswin/turbocable-server) fan-out pipeline. The **`turbocable_nats`** gem (Ruby API: **`Turbocable`**) publishes messages to NATS JetStream on the `TURBOCABLE.*` subject tree, where `turbocable-server` picks them up and fans them out to WebSocket subscribers.
 
 > **Status: 1.0 — stable.** Publishes JSON and MessagePack to NATS JetStream, mints RS256 JWTs, publishes rotating public keys to NATS KV, and provides a null adapter for test suites.
 
@@ -9,13 +9,13 @@ Pure-Ruby publisher for the [TurboCable](https://github.com/samaswin/turbocable-
 Add to your `Gemfile`:
 
 ```ruby
-gem "turbocable", "~> 1.0"
+gem "turbocable_nats", "~> 1.0"
 ```
 
 Or install directly:
 
 ```sh
-gem install turbocable
+gem install turbocable_nats
 ```
 
 ## Requirements
@@ -38,7 +38,7 @@ gem install turbocable
 ## Quickstart
 
 ```ruby
-require "turbocable"
+require "turbocable_nats"
 
 Turbocable.configure do |c|
   # NATS server URL (env: TURBOCABLE_NATS_URL)
@@ -111,7 +111,7 @@ Turbocable.broadcast("stream", {text: "hello"}, codec: :json) # explicit
 
 ### MessagePack
 
-Requires the `msgpack` gem (~> 1.7), which is **not** a hard dependency of `turbocable`. Add it to your Gemfile:
+Requires the `msgpack` gem (~> 1.7), which is **not** a hard dependency of `turbocable_nats`. Add it to your Gemfile:
 
 ```ruby
 gem "msgpack", "~> 1.7"
@@ -211,7 +211,7 @@ See [docs/operations.md](docs/operations.md) for a Kubernetes `livenessProbe` ex
 
 The table below lists the `turbocable-server` versions this gem has been tested against. The E2E integration spec parses `/health.version` after server boot and records it in the test report — this table is generated from those recorded versions.
 
-| turbocable (gem) | turbocable-server | Notes |
+| turbocable_nats (gem) | turbocable-server | Notes |
 |:---:|:---:|-------|
 | `1.0.x` | `≥ 0.5.0` | Full feature support (JSON, MsgPack, JWT, KV hot-reload) |
 

@@ -10,7 +10,7 @@ SimpleCov.start do
   minimum_coverage 90
 end
 
-require "turbocable"
+require "turbocable_nats"
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
